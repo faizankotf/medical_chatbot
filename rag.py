@@ -15,9 +15,8 @@ from langchain_community.llms import Ollama
 from sentence_transformers import CrossEncoder
 
 
-# -----------------------------
+
 # Load Patient Data
-# -----------------------------
 def load_patient_text(mrd_number):
     db = SessionLocal()
     mrd_number = mrd_number.strip().lower()
@@ -55,9 +54,8 @@ def load_patient_text(mrd_number):
     return texts, None
 
 
-# -----------------------------
+
 # Chunking
-# -----------------------------
 def create_chunks(texts):
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=300,
@@ -71,7 +69,7 @@ def create_chunks(texts):
 # -----------------------------
 def create_retrievers(docs):
 
-    # 🔥 Ollama Embedding
+    # Ollama Embedding
     embedding_model = OllamaEmbeddings(
         model="nomic-embed-text"
     )
@@ -90,9 +88,8 @@ def create_retrievers(docs):
     return vector_retriever, bm25_retriever
 
 
-# -----------------------------
+
 # Hybrid Retrieval
-# -----------------------------
 def hybrid_retrieve(query, vector_retriever, bm25_retriever):
 
     vec_docs = vector_retriever.invoke(query)
@@ -105,10 +102,7 @@ def hybrid_retrieve(query, vector_retriever, bm25_retriever):
 
     return list(unique.values())
 
-
-# -----------------------------
 # Reranker
-# -----------------------------
 reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
 
 def rerank(query, docs, top_k=3):
@@ -126,16 +120,15 @@ def rerank(query, docs, top_k=3):
     return [doc for _, doc in ranked[:top_k]]
 
 
-# -----------------------------
+
 # LLM
-# -----------------------------
+
 def create_llm():
     return Ollama(model="llama3.2:1b")
 
 
-# -----------------------------
+
 # Final Answer Generator
-# -----------------------------
 def generate_answer(query, docs):
 
     llm = create_llm()
@@ -155,9 +148,8 @@ def generate_answer(query, docs):
     return llm.invoke(prompt)
 
 
-# -----------------------------
 # MAIN PIPELINE
-# -----------------------------
+
 def run_query(mrd, query):
 
     if not mrd:
